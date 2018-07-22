@@ -136,7 +136,6 @@ public class PhoneBillServlet extends HttpServlet
         Messages.formatDictionaryEntries(pw, dictionary);
 
         pw.flush();
-
         response.setStatus( HttpServletResponse.SC_OK );
     }
 

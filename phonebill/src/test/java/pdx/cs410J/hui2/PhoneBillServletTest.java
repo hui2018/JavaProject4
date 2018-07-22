@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
  * provide mock http requests and responses.
  */
 public class PhoneBillServletTest {
-
+/*
   @Test
   public void initiallyServletContainsNoDictionaryEntries() throws ServletException, IOException {
     PhoneBillServlet servlet = new PhoneBillServlet();
@@ -57,5 +57,6 @@ public class PhoneBillServletTest {
 
     assertThat(servlet.getDefinition(word), equalTo(definition));
   }
+  */
 
 }
