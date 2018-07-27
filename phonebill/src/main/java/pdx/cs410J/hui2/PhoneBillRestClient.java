@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.URLConnection.guessContentTypeFromStream;
 
 /**
  * A helper class for accessing the rest client.  Note that this class provides
@@ -20,62 +21,48 @@ public class PhoneBillRestClient extends HttpRequestHelper
 
     private final String url;
 
-
-    /**
-     * Creates a client to the Phone Bil REST service running on the given host and port
-     * @param hostName The name of the host
-     * @param port The port
-     */
     public PhoneBillRestClient( String hostName, int port )
     {
         this.url = String.format( "http://%s:%d/%s/%s", hostName, port, WEB_APP, SERVLET );
     }
 
-    /**
-     * Returns all dictionary entries from the server
-     */
-    public Map<String, String> getAllDictionaryEntries() throws IOException {
-      Response response = get(this.url);
-      return Messages.parseDictionary(response.getContent());
+    public Response printAllKeysAndValues() throws IOException {
+        return get(this.url);
     }
 
-    /**
-     * Returns the definition for the given word
-     */
-    public String getDefinition(String word) throws IOException {
-      Response response = get(this.url, "word", word);
-      throwExceptionIfNotOkayHttpStatus(response);
-      String content = response.getContent();
-      return Messages.parseDictionaryEntry(content).getValue();
+    public Response getSearchValues(PhoneBill bill)
+    {
+
+        return null;
     }
 
-    public void addDictionaryEntry(String word, String definition) throws IOException {
-      Response response = postToMyURL("word", word, "definition", definition);
-      throwExceptionIfNotOkayHttpStatus(response);
+    public Response addNewCustomer(String customer, PhoneCall call)
+    {
+        try {
+            return post(this.url, "customer", customer, "caller", call.callerNumber, "callee", call.calleeNumber,
+                    "startTime", call.getStartTimeString(), "endTime", call.getEndTimeString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public Response printAll(String customer)
+    {
+        try {
+            return get(this.url, "customer", customer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    @VisibleForTesting
-    Response postToMyURL(String... dictionaryEntries) throws IOException {
-      return post(this.url, dictionaryEntries);
+    public Response printSearch(String customer, String startTime, String endTime)
+    {
+        try {
+            return post(this.url, "customer", customer, "startTime", startTime, "endTime", endTime);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
-
-    public void removeAllDictionaryEntries() throws IOException {
-      Response response = delete(this.url);
-      throwExceptionIfNotOkayHttpStatus(response);
-    }
-
-    private Response throwExceptionIfNotOkayHttpStatus(Response response) {
-      int code = response.getCode();
-      if (code != HTTP_OK) {
-        throw new PhoneBillRestException(code);
-      }
-      return response;
-    }
-
-    private class PhoneBillRestException extends RuntimeException {
-      public PhoneBillRestException(int httpStatusCode) {
-        super("Got an HTTP Status Code of " + httpStatusCode);
-      }
-    }
-
 }

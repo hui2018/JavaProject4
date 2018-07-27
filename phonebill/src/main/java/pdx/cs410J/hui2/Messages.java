@@ -27,6 +27,11 @@ public class Messages
         return String.format("The required parameter \"%s\" is missing", parameterName);
     }
 
+    public static String printOut(String customerName, String callerNumber, String calleeNumber, String startTime, String endTime)
+    {
+        return String.format("Customer Name: %s: ", customerName);
+    }
+
     public static String definedWordAs(String word, String definition )
     {
         return String.format( "Defined %s as %s", word, definition );

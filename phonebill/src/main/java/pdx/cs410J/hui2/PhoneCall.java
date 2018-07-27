@@ -5,22 +5,20 @@ import edu.pdx.cs410J.AbstractPhoneCall;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.DateFormat;
+
+import java.util.Locale;
 
 
 public class PhoneCall extends AbstractPhoneCall implements Comparable<PhoneCall> {
-  private String callerNumber;
-  private String calleeNumber;
-  private String startTime;
-  private String endTime;
+  String callerNumber;
+  String calleeNumber;
+  String startTime;
+  String endTime;
   public Date dateStartTime;
   public Date dateEndTime;
-    /**
-     * Constructor that takes in the phone number and time of the phone call
-     * @param callerNumber  The phone number of the caller
-     * @param calleeNumber  The phone number of the callee
-     * @param startTime     The start date and time of the call
-     * @param endTime       The end date and time of the call
-     */
+  DateFormat ShortDateFormat;
+
   PhoneCall(String callerNumber, String calleeNumber, String startTime, String endTime)
   {
     this.callerNumber = callerNumber;
@@ -29,37 +27,22 @@ public class PhoneCall extends AbstractPhoneCall implements Comparable<PhoneCall
     this.endTime = endTime;
     formatter(startTime, endTime);
   }
-    /**
-     *
-     * @return it returns the caller's phone number
-     */
+
   @Override
   public String getCaller() {
     return callerNumber;
   }
 
-    /**
-     *
-     * @return it returns the callee's phone number
-     */
   @Override
   public String getCallee() {
     return calleeNumber;
   }
 
-    /**
-     *
-     * @return It returns the start date and time
-     */
   @Override
   public String getStartTimeString() {
     return startTime;
   }
 
-    /**
-     *
-     * @return It returns the end date and time
-     */
   @Override
   public String getEndTimeString() {
     return endTime;
@@ -96,5 +79,19 @@ public class PhoneCall extends AbstractPhoneCall implements Comparable<PhoneCall
     if(phoneCallerCompare != 0)
       return phoneCallerCompare;
     return 0;
+  }
+
+  public String getDuration(Date startTime, Date endTime)
+  {
+    long duration;
+    duration = endTime.getTime() -startTime.getTime();
+    long minutes;
+    minutes = duration / (60*1000)%60;
+    long hour;
+    hour = duration /(60*60*1000)%24;
+    if(hour == 0)
+      return ""+minutes;
+    else
+      return ""+hour+":"+minutes;
   }
 }

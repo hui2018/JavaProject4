@@ -8,8 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collection;
 
 /**
  * This servlet ultimately provides a REST API for working with an
@@ -23,6 +27,9 @@ public class PhoneBillServlet extends HttpServlet
     static final String DEFINITION_PARAMETER = "definition";
 
     private final Map<String, String> dictionary = new HashMap<>();
+    private final Map<String, PhoneBill> collectionOfCalls = new HashMap<String, PhoneBill>();
+    Collection<PhoneCall> phoneCalls = null;
+    private PhoneBill bill = null;
 
     /**
      * Handles an HTTP GET request from a client by writing the definition of the
@@ -34,14 +41,32 @@ public class PhoneBillServlet extends HttpServlet
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
     {
         response.setContentType( "text/plain" );
-
-        String word = getParameter( WORD_PARAMETER, request );
-        if (word != null) {
-            writeDefinition(word, response);
-
-        } else {
-            writeAllDictionaryEntries(response);
+        String customer = getParameter( "customer", request );
+        if (customer == null) {
+            missingRequiredParameter( response, "customer" );
+            return;
         }
+        PrintWriter pw = response.getWriter();
+        if(collectionOfCalls.get(customer) == null)
+        {
+            System.out.println("Customer does not exist in server");
+            pw.println("Customer does not exist in server");
+        }
+        else
+        {
+            phoneCalls = collectionOfCalls.get(customer).getPhoneCalls();
+            pw.println("Customer Name    " + "Caller's Phone number   " + "Callee's phone number         " + "Start Time                  " +
+                    "End Time                " + "Duration (hh:mm)");
+            for(PhoneCall call: phoneCalls)
+            {
+                pw.println("     "+customer + "            "+ call.getCaller()+"            "+call.getCallee()+ "         " +
+                        call.getStartTimeString()+"          "+call.getEndTimeString()+"             "+
+                        call.getDuration(call.getStartTime(),call.getEndTime()));
+            }
+            pw.flush();
+        }
+
+        response.setStatus( HttpServletResponse.SC_OK);
     }
 
     /**
@@ -53,24 +78,70 @@ public class PhoneBillServlet extends HttpServlet
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
     {
         response.setContentType( "text/plain" );
-
-        String word = getParameter(WORD_PARAMETER, request );
-        if (word == null) {
-            missingRequiredParameter(response, WORD_PARAMETER);
+        String customer = getParameter( "customer", request );
+        if (customer == null) {
+            missingRequiredParameter( response, "customer" );
+            return;
+        }
+        String startTime = getParameter( "startTime", request );
+        if (startTime == null) {
+            missingRequiredParameter( response, "startTime" );
+            return;
+        }
+        String endTime = getParameter( "endTime", request );
+        if (endTime == null) {
+            missingRequiredParameter( response, "endTime" );
             return;
         }
 
-        String definition = getParameter(DEFINITION_PARAMETER, request );
-        if ( definition == null) {
-            missingRequiredParameter( response, DEFINITION_PARAMETER );
-            return;
-        }
-
-        this.dictionary.put(word, definition);
-
+        String caller = getParameter( "caller", request );
+        String callee = getParameter( "callee", request );
         PrintWriter pw = response.getWriter();
-        pw.println(Messages.definedWordAs(word, definition));
-        pw.flush();
+        if(caller == null && callee == null)
+        {
+            if(collectionOfCalls.get(customer) == null)
+            {
+                System.out.println("Customer does not exist in server");
+                pw.println("Customer does not exist in server");
+            }
+            else
+            {
+                phoneCalls = collectionOfCalls.get(customer).getPhoneCalls();
+                pw.println("Customer Name    " + "Caller's Phone number   " + "Callee's phone number         " + "Start Time                  " +
+                        "End Time                " + "Duration (hh:mm)");
+                for(PhoneCall call: phoneCalls) {
+                    if(compareDate(startTime, endTime, call.getStartTimeString()))
+                    {
+                        pw.println("     " + customer + "            " + call.getCaller() + "            " + call.getCallee() + "         " +
+                                call.getStartTimeString() + "          " + call.getEndTimeString() + "             " +
+                                call.getDuration(call.getStartTime(), call.getEndTime()));
+                    }
+                }
+            }
+            pw.flush();
+            return;
+        }
+
+        if (caller == null) {
+            missingRequiredParameter( response, "caller" );
+            return;
+        }
+        if (callee == null) {
+            missingRequiredParameter( response, "callee" );
+            return;
+        }
+
+        if(collectionOfCalls != null && collectionOfCalls.get(customer) != null) {
+            bill = collectionOfCalls.get(customer);
+            bill.addPhoneCall(new PhoneCall(caller, callee, startTime, endTime));
+            collectionOfCalls.put(customer, bill);
+            System.out.println("Adding new phoneCall to existing customer");
+        }
+        else
+        {
+            collectionOfCalls.put(customer, new PhoneBill(customer, new PhoneCall(caller, callee, startTime, endTime)));
+            System.out.println("Adding new customer");
+        }
 
         response.setStatus( HttpServletResponse.SC_OK);
     }
@@ -100,43 +171,10 @@ public class PhoneBillServlet extends HttpServlet
      * The text of the error message is created by {@link Messages#missingRequiredParameter(String)}
      */
     private void missingRequiredParameter( HttpServletResponse response, String parameterName )
-        throws IOException
+            throws IOException
     {
         String message = Messages.missingRequiredParameter(parameterName);
         response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
-    }
-
-    /**
-     * Writes the definition of the given word to the HTTP response.
-     *
-     * The text of the message is formatted with
-     * {@link Messages#formatDictionaryEntry(String, String)}
-     */
-    private void writeDefinition(String word, HttpServletResponse response ) throws IOException
-    {
-        String definition = this.dictionary.get(word);
-
-        PrintWriter pw = response.getWriter();
-        pw.println(Messages.formatDictionaryEntry(word, definition));
-
-        pw.flush();
-
-        response.setStatus( HttpServletResponse.SC_OK );
-    }
-
-    /**
-     * Writes all of the dictionary entries to the HTTP response.
-     *
-     * The text of the message is formatted with
-     * {@link Messages#formatDictionaryEntry(String, String)}
-     */
-    private void writeAllDictionaryEntries(HttpServletResponse response ) throws IOException
-    {
-        PrintWriter pw = response.getWriter();
-        Messages.formatDictionaryEntries(pw, dictionary);
-
-        pw.flush();
-        response.setStatus( HttpServletResponse.SC_OK );
     }
 
     /**
@@ -146,18 +184,33 @@ public class PhoneBillServlet extends HttpServlet
      *         <code>null</code> or is the empty string
      */
     private String getParameter(String name, HttpServletRequest request) {
-      String value = request.getParameter(name);
-      if (value == null || "".equals(value)) {
-        return null;
+        String value = request.getParameter(name);
+        if (value == null || "".equals(value)) {
+            return null;
 
-      } else {
-        return value;
-      }
+        } else {
+            return value;
+        }
     }
 
-    @VisibleForTesting
-    String getDefinition(String word) {
-        return this.dictionary.get(word);
+    public static boolean compareDate(String startDate, String endDate, String startCollection)
+    {
+        SimpleDateFormat startFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm aa");
+        Date start = null;
+        Date end = null;
+        Date startCol = null;
+        try {
+            start = startFormat.parse(startDate);
+            end = startFormat.parse(endDate);
+            startCol = startFormat.parse(startCollection);
+            if(start.compareTo(startCol) > 0 && end.compareTo(startCol) < 0) {
+                return false;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return true;
     }
 
 }
