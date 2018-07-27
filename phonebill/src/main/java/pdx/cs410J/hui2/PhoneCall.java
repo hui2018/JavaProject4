@@ -89,9 +89,16 @@ public class PhoneCall extends AbstractPhoneCall implements Comparable<PhoneCall
     minutes = duration / (60*1000)%60;
     long hour;
     hour = duration /(60*60*1000)%24;
-    if(hour == 0)
-      return ""+minutes;
-    else
+    long days;
+    days = duration /(1000*60*60*24);
+    /*
+    if(hour == 0 && days == 0)
+      //return ""+minutes;
+      return ""+days+":"+hour+":"+minutes;
+    else if(days == 0)
       return ""+hour+":"+minutes;
+    else
+    */
+      return ""+days+":"+hour+":"+minutes;
   }
 }

@@ -4,6 +4,8 @@ import edu.pdx.cs410J.web.HttpRequestHelper;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.UnknownHostException;
+import java.net.UnknownServiceException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.net.HttpURLConnection;
@@ -25,7 +27,7 @@ public class Project4 {
     public static String hostName;
     public static String portString;
 
-    public static void main(String... args) {
+    public static void main(String... args) throws UnknownServiceException {
         checkReadMe(args);
 
         ArrayList listOfArgs = new ArrayList<String>(Arrays.asList(args));
@@ -79,11 +81,12 @@ public class Project4 {
             port = Integer.parseInt( portString );
             
         } catch (NumberFormatException ex) {
-            usage("Port \"" + portString + "\" must be an integer");
+            System.out.println("Port \"" + portString + "\" must be an integer");
             return;
         }
 
         PhoneBillRestClient client = new PhoneBillRestClient(hostName, port);
+
         HttpRequestHelper.Response response = null;
         if(addOne)
         {
@@ -93,9 +96,9 @@ public class Project4 {
             {
                 PhoneBill single = new PhoneBill(customerName, new PhoneCall(callerNumber, calleeNumber, startTime, endTime));
                 ArrayList<PhoneCall> call = (ArrayList<PhoneCall>) single.getPhoneCalls();
-                System.out.println("Print option detected: \n");
+                System.out.println("\nPrint option detected: \n");
                 System.out.println("Customer Name    " + "Caller's Phone number   " + "Callee's phone number         " + "Start Time                  " +
-                        "End Time                " + "Duration (hh:mm)");
+                        "End Time                " + "Duration (dd:hh:mm)");
                 System.out.println("     "+single.getCustomer() + "            " + call.get(0).getCaller() + "            " +
                         call.get(0).getCallee() + "         " + call.get(0).getStartTimeString() + "          " + call.get(0).getEndTimeString() +
                         "             " + call.get(0).getDuration(call.get(0).getStartTime(), call.get(0).getEndTime()));
@@ -240,27 +243,6 @@ public class Project4 {
         System.exit(1);
     }
 
-
-    private static void usage( String message )
-    {
-        PrintStream err = System.err;
-        err.println("** " + message);
-        err.println();
-        err.println("usage: java Project4 host port [word] [definition]");
-        err.println("  host         Host of web server");
-        err.println("  port         Port of web server");
-        err.println("  word         Word in dictionary");
-        err.println("  definition   Definition of word");
-        err.println();
-        err.println("This simple program posts words and their definitions");
-        err.println("to the server.");
-        err.println("If no definition is specified, then the word's definition");
-        err.println("is printed.");
-        err.println("If no word is specified, all dictionary entries are printed");
-        err.println();
-
-        System.exit(1);
-    }
 
     private static void checkReadMe(String[] args)
     {

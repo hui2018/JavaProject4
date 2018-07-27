@@ -107,8 +107,8 @@ public class PhoneBillServlet extends HttpServlet
             else
             {
                 phoneCalls = collectionOfCalls.get(customer).getPhoneCalls();
-                pw.println("Customer Name    " + "Caller's Phone number   " + "Callee's phone number         " + "Start Time                  " +
-                        "End Time                " + "Duration (hh:mm)");
+                pw.println("\nCustomer Name    " + "Caller's Phone number   " + "Callee's phone number         " + "Start Time                  " +
+                        "End Time                " + "Duration (dd:hh:mm)");
                 for(PhoneCall call: phoneCalls) {
                     if(compareDate(startTime, endTime, call.getStartTimeString()))
                     {
