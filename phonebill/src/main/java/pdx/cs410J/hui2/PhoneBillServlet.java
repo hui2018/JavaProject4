@@ -199,11 +199,17 @@ public class PhoneBillServlet extends HttpServlet
         Date start = null;
         Date end = null;
         Date startCol = null;
+        long duration1;
+        long duration2;
         try {
             start = startFormat.parse(startDate);
             end = startFormat.parse(endDate);
             startCol = startFormat.parse(startCollection);
-            if(start.compareTo(startCol) > 0 && end.compareTo(startCol) < 0) {
+            duration1 = startCol.getTime() - start.getTime();
+            duration2 = end.getTime() - startCol.getTime();
+            if(duration1 < 0)
+                return false;
+            if(duration2 < 0) {
                 return false;
             }
         } catch (ParseException e) {

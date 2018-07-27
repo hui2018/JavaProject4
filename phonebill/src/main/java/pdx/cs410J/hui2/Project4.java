@@ -421,10 +421,12 @@ public class Project4 {
         SimpleDateFormat startFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm aa");
         Date start = null;
         Date end = null;
+        long duration;
         try {
             start = startFormat.parse(startDate);
             end = startFormat.parse(endDate);
-            if(start.compareTo(end) > 0) {
+            duration = end.getTime() - start.getTime();
+            if(duration < 0) {
                 System.err.println("Start time is after end time, please modified the date/time");
                 System.exit(1);
             }
