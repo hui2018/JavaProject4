@@ -1,7 +1,5 @@
 package pdx.cs410J.hui2;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,19 +21,18 @@ import java.util.Collection;
  */
 public class PhoneBillServlet extends HttpServlet
 {
-    static final String WORD_PARAMETER = "word";
-    static final String DEFINITION_PARAMETER = "definition";
-
-    private final Map<String, String> dictionary = new HashMap<>();
     private final Map<String, PhoneBill> collectionOfCalls = new HashMap<String, PhoneBill>();
     Collection<PhoneCall> phoneCalls = null;
     private PhoneBill bill = null;
 
     /**
-     * Handles an HTTP GET request from a client by writing the definition of the
-     * word specified in the "word" HTTP parameter to the HTTP response.  If the
-     * "word" parameter is not specified, all of the entries in the dictionary
-     * are written to the HTTP response.
+     * Handles an HTTP GET request from a client by writing the customer information
+     * such as the customer name and the phone calls which is the HTTP parameter to the HTTP response.
+     * This function is mainly to write all of the customer's phone bill and return to the client
+     * @param request   The request that we are getting from the client
+     * @param response  The response that we are to return back to the client and back to the main function
+     * @throws ServletException Check that the server is connected
+     * @throws IOException  check that sever is able to write
      */
     @Override
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
@@ -56,23 +53,27 @@ public class PhoneBillServlet extends HttpServlet
         {
             phoneCalls = collectionOfCalls.get(customer).getPhoneCalls();
             pw.println("Customer Name    " + "Caller's Phone number   " + "Callee's phone number         " + "Start Time                  " +
-                    "End Time                " + "Duration (hh:mm)");
+                    "End Time                " + "Duration (dd:hh:mm)");
             for(PhoneCall call: phoneCalls)
             {
                 pw.println("     "+customer + "            "+ call.getCaller()+"            "+call.getCallee()+ "         " +
                         call.getStartTimeString()+"          "+call.getEndTimeString()+"             "+
                         call.getDuration(call.getStartTime(),call.getEndTime()));
             }
-            pw.flush();
         }
-
+        pw.flush();
         response.setStatus( HttpServletResponse.SC_OK);
     }
 
     /**
-     * Handles an HTTP POST request by storing the dictionary entry for the
-     * "word" and "definition" request parameters.  It writes the dictionary
-     * entry to the HTTP response.
+     * doPost function is to add a customer to a new object or to an existing customer that is requested from the client
+     * and updated it onto the server. There is also another function that is to search for an existing customer only when
+     * the caller and callee doesn't exist. Once it detect that caller and callee doesn't exist it will then
+     * write it to response and return it. Then the main function will print out all of the information.
+     * @param request   Request information from the client
+     * @param response  response the information back to the client
+     * @throws ServletException If the server doesn't connect throw an error
+     * @throws IOException  If write doesn't work throw an error
      */
     @Override
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
@@ -147,25 +148,6 @@ public class PhoneBillServlet extends HttpServlet
     }
 
     /**
-     * Handles an HTTP DELETE request by removing all dictionary entries.  This
-     * behavior is exposed for testing purposes only.  It's probably not
-     * something that you'd want a real application to expose.
-     */
-    @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/plain");
-
-        this.dictionary.clear();
-
-        PrintWriter pw = response.getWriter();
-        pw.println(Messages.allDictionaryEntriesDeleted());
-        pw.flush();
-
-        response.setStatus(HttpServletResponse.SC_OK);
-
-    }
-
-    /**
      * Writes an error message about a missing parameter to the HTTP response.
      *
      * The text of the error message is created by {@link Messages#missingRequiredParameter(String)}
@@ -193,6 +175,16 @@ public class PhoneBillServlet extends HttpServlet
         }
     }
 
+    /**
+     * Check that the date for search function is valid. The client will request customer name and two date,
+     * a starting and ending date. Then it will take those two parameters and check it with the start date
+     * that is already stored on the server. It will check that the server start date is between the date that is
+     * requested from the client.
+     * @param startDate The start date requested from the client
+     * @param endDate   The end date requested from the client
+     * @param startCollection the start date that is already on the server
+     * @return  It will return true or false if the date is between the request
+     */
     public static boolean compareDate(String startDate, String endDate, String startCollection)
     {
         SimpleDateFormat startFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm aa");

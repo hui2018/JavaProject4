@@ -2,16 +2,11 @@ package pdx.cs410J.hui2;
 
 import edu.pdx.cs410J.web.HttpRequestHelper;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.net.UnknownHostException;
 import java.net.UnknownServiceException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.net.HttpURLConnection;
 import java.util.*;
-import java.io.StringWriter;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -27,6 +22,12 @@ public class Project4 {
     public static String hostName;
     public static String portString;
 
+    /**
+     * In the main function we are checking all of the parameter that are passed in are in the right format, the correct
+     * number of arguments, and that start time is before end time.
+     * @param args The array of arguments that are passed in from the command line.
+     * @throws UnknownServiceException Throw an error if the connection to the server doesn't work
+     */
     public static void main(String... args) throws UnknownServiceException {
         checkReadMe(args);
 
@@ -119,10 +120,14 @@ public class Project4 {
             response = client.printAll(customerName);
             System.out.println(response.getContent());
         }
-
+        System.out.println("\n");
         System.exit(0);
     }
 
+    /**
+     * check the number of arguments that are being passed in
+     * @param numArgs array of arguments passed in from the command line
+     */
     public static void checkArgs(ArrayList numArgs) {
         if(searchOpt)
         {
@@ -167,6 +172,11 @@ public class Project4 {
         }
     }
 
+    /**
+     * Remove all of the "-" parameters then we return back the array list
+     * @param listOfArgs array of parameter passed in from the command line
+     * @return we are returning the array of arguments after we remove any of the "-" arguments
+     */
     private static ArrayList removeOption(ArrayList listOfArgs) {
         if(listOfArgs.contains("-print"))
         {
@@ -227,6 +237,11 @@ public class Project4 {
         return listOfArgs;
     }
 
+    /**
+     * check the response code
+     * @param code Check if the code is valid or not
+     * @param response the response from the client from the server
+     */
     private static void checkResponseCode( int code, HttpRequestHelper.Response response )
     {
         if (response.getCode() != code) {
@@ -235,6 +250,10 @@ public class Project4 {
         }
     }
 
+    /**
+     * check the error of print
+     * @param message the string with the incorrect parameter
+     */
     private static void error( String message )
     {
         PrintStream err = System.err;
@@ -243,7 +262,10 @@ public class Project4 {
         System.exit(1);
     }
 
-
+    /**
+     * Check if there is a -readme, if there just print out the document and exit
+     * @param args array of string passed in from the command line.
+     */
     private static void checkReadMe(String[] args)
     {
         for(int i = 0; i<args.length; ++i)
@@ -256,6 +278,9 @@ public class Project4 {
         }
     }
 
+    /**
+     * Print out the read me
+     */
     private static void readMe()
     {
         System.out.println("Name: Hui Yu Sim \nProject: 4 A REST-ful Phone Bill Web Service\n\n" +
@@ -398,6 +423,11 @@ public class Project4 {
         }
     }
 
+    /**
+     * Compare the date of start and end time
+     * @param startDate the start date with correct format passed in from the command line
+     * @param endDate the end date with the correct format passed in from the command line
+     */
     public static void compareDate(String startDate, String endDate)
     {
         SimpleDateFormat startFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm aa");

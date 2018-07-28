@@ -21,21 +21,22 @@ public class PhoneBillRestClient extends HttpRequestHelper
 
     private final String url;
 
+    /**
+     * check the format of the host and port is correct
+     * @param hostName  the host name of the server
+     * @param port  the port number of the server
+     */
     public PhoneBillRestClient( String hostName, int port )
     {
         this.url = String.format( "http://%s:%d/%s/%s", hostName, port, WEB_APP, SERVLET );
     }
 
-    public Response printAllKeysAndValues() throws IOException {
-        return get(this.url);
-    }
-
-    public Response getSearchValues(PhoneBill bill)
-    {
-
-        return null;
-    }
-
+    /**
+     * doPost function to add a new customer to post from the server
+     * @param customer  the customer name
+     * @param call  object of phone call
+     * @return  If url doesn't exist return nothing
+     */
     public Response addNewCustomer(String customer, PhoneCall call)
     {
         try {
@@ -46,6 +47,12 @@ public class PhoneBillRestClient extends HttpRequestHelper
         }
         return null;
     }
+
+    /**
+     * Prints all of the customer that is requesting from the server
+     * @param customer  the customer name that we are requesting
+     * @return return nothing if the customer doesn't exist
+     */
     public Response printAll(String customer)
     {
         try {
@@ -56,6 +63,13 @@ public class PhoneBillRestClient extends HttpRequestHelper
         return null;
     }
 
+    /**
+     * Request all of the information from the server that is between the start and end time of a specific customer.
+     * @param customer the customer name that is request for a search
+     * @param startTime the start time that is request for a search
+     * @param endTime the end time that is reqeust for a search
+     * @return return nothing if there is nothing on the server
+     */
     public Response printSearch(String customer, String startTime, String endTime)
     {
         try {

@@ -6,10 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.text.DateFormat;
-
-import java.util.Locale;
-
-
 public class PhoneCall extends AbstractPhoneCall implements Comparable<PhoneCall> {
   String callerNumber;
   String calleeNumber;
